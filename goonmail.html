@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Goonmail</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,500;0,600;1,400&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --concrete:#e3e0d9;
+  --panel:#f6f4ef;
+  --panel-2:#efece5;
+  --ink:#191b1d;
+  --ink-soft:#5d6166;
+  --rule:#d2cec4;
+  --crimson:#a71d28;
+  --hazard:#e8b71d;
+  --hazard-ink:#2a2200;
+  --hover:#e9e6de;
+  --sel:#f2e5c9;
+}
+:root:not([data-theme="light"]){
+  @media (prefers-color-scheme: dark){
+    --concrete:#16181a;
+    --panel:#1d2022;
+    --panel-2:#232628;
+    --ink:#e7e4dd;
+    --ink-soft:#9aa0a6;
+    --rule:#31353a;
+    --crimson:#e0555f;
+    --hazard:#e8b71d;
+    --hazard-ink:#2a2200;
+    --hover:#25292c;
+    --sel:#33301f;
+  }
+}
+:root[data-theme="dark"]{
+  --concrete:#16181a; --panel:#1d2022; --panel-2:#232628; --ink:#e7e4dd;
+  --ink-soft:#9aa0a6; --rule:#31353a; --crimson:#e0555f; --hazard:#e8b71d;
+  --hazard-ink:#2a2200; --hover:#25292c; --sel:#33301f;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;background:var(--concrete);color:var(--ink);
+  font-family:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased;
+  display:flex;flex-direction:column;overflow:hidden;
+}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+:focus-visible{outline:2px solid var(--crimson);outline-offset:2px;border-radius:3px}
+
+/* ---------- top bar ---------- */
+.topbar{
+  display:flex;align-items:center;gap:14px;padding:8px 14px;
+  background:var(--concrete);border-bottom:1px solid var(--rule);flex:0 0 auto;
+}
+.brand{display:flex;align-items:center;gap:9px;flex:0 0 auto}
+.brand svg{display:block}
+.wordmark{
+  font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:27px;
+  letter-spacing:.01em;line-height:1;
+}
+.wordmark span{color:var(--crimson)}
+.hamburger{display:none;padding:6px;line-height:0}
+.search{
+  flex:1 1 auto;max-width:700px;display:flex;align-items:center;gap:9px;
+  background:var(--panel-2);border:1px solid transparent;border-radius:7px;padding:8px 13px;
+}
+.search:focus-within{border-color:var(--rule);background:var(--panel)}
+.search input{
+  flex:1;border:0;background:none;color:var(--ink);font:inherit;outline:none;min-width:0;
+}
+.search input::placeholder{color:var(--ink-soft)}
+.me{
+  margin-left:auto;display:flex;align-items:center;gap:10px;flex:0 0 auto;
+}
+.avatar{
+  width:34px;height:34px;border-radius:50%;background:var(--crimson);color:#fff;
+  display:grid;place-items:center;font-weight:600;font-size:13px;letter-spacing:.02em;
+}
+.theme-toggle{padding:6px 9px;border-radius:6px;color:var(--ink-soft)}
+.theme-toggle:hover{background:var(--hover)}
+
+/* ---------- shell ---------- */
+.shell{flex:1 1 auto;display:flex;min-height:0}
+
+/* ---------- sidebar ---------- */
+.sidebar{
+  width:236px;flex:0 0 auto;padding:10px 10px 0 8px;display:flex;flex-direction:column;
+  overflow-y:auto;
+}
+.compose{
+  display:flex;align-items:center;gap:10px;background:var(--hazard);color:var(--hazard-ink);
+  font-weight:600;padding:13px 21px;border-radius:26px;margin:4px 0 16px 4px;
+  align-self:flex-start;box-shadow:0 1px 2px rgba(0,0,0,.18);
+}
+.compose:hover{filter:brightness(1.06)}
+.navitem{
+  display:flex;align-items:center;gap:13px;width:100%;text-align:left;
+  padding:7px 14px;border-radius:0 18px 18px 0;color:var(--ink);
+}
+.navitem:hover{background:var(--hover)}
+.navitem.on{background:var(--sel);font-weight:600}
+.navitem .ct{margin-left:auto;font-size:12.5px;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.navitem.on .ct{color:var(--ink)}
+.navitem .ico{width:18px;flex:0 0 18px;text-align:center;font-size:14px}
+.navhead{
+  font-size:12px;color:var(--ink-soft);padding:16px 14px 5px;letter-spacing:.04em;
+}
+.dot{width:9px;height:9px;border-radius:2px;flex:0 0 9px;margin-left:4px}
+.storage{margin-top:auto;padding:16px 14px;font-size:12px;color:var(--ink-soft)}
+.bar{height:4px;background:var(--rule);border-radius:2px;overflow:hidden;margin-bottom:6px}
+.bar i{display:block;height:100%;width:21%;background:var(--crimson)}
+
+/* ---------- list ---------- */
+.main{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;padding:0 10px 10px 0}
+.pane{
+  flex:1 1 auto;min-height:0;background:var(--panel);border:1px solid var(--rule);
+  border-radius:12px;display:flex;flex-direction:column;overflow:hidden;
+}
+.tabs{display:flex;border-bottom:1px solid var(--rule);flex:0 0 auto;padding:0 4px}
+.tab{
+  display:flex;align-items:center;gap:9px;padding:13px 22px 11px;color:var(--ink-soft);
+  border-bottom:3px solid transparent;font-weight:500;
+}
+.tab:hover{background:var(--hover)}
+.tab.on{color:var(--crimson);border-bottom-color:var(--crimson)}
+.list{overflow-y:auto;flex:1 1 auto}
+.row{
+  display:flex;align-items:center;gap:11px;padding:9px 14px;width:100%;text-align:left;
+  border-bottom:1px solid var(--rule);cursor:pointer;
+}
+.row:hover{background:var(--hover)}
+.row.unread{background:var(--panel-2);font-weight:600}
+.row.unread .snip{font-weight:400}
+.star{
+  flex:0 0 auto;font-size:16px;line-height:1;color:var(--ink-soft);opacity:.45;padding:2px;
+}
+.star:hover{opacity:1}
+.star.on{color:var(--hazard);opacity:1}
+.from{flex:0 0 174px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mid{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.snip{color:var(--ink-soft)}
+.when{flex:0 0 auto;font-size:12.5px;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.tag{
+  display:inline-block;font-size:11px;padding:1px 7px;border-radius:3px;margin-right:8px;
+  background:var(--sel);color:var(--ink);font-weight:600;vertical-align:1px;
+}
+.empty{padding:70px 24px;text-align:center;color:var(--ink-soft)}
+.empty b{display:block;color:var(--ink);font-size:17px;margin-bottom:6px;font-weight:600}
+
+/* ---------- reading ---------- */
+.reader{overflow-y:auto;flex:1 1 auto;padding:18px 26px 60px}
+.reader h1{
+  font-family:"Barlow Condensed",sans-serif;font-size:29px;font-weight:600;
+  margin:4px 0 18px;line-height:1.15;
+}
+.rhead{display:flex;align-items:flex-start;gap:12px;margin-bottom:20px}
+.rhead .avatar{width:38px;height:38px;font-size:14px;background:var(--ink-soft)}
+.rmeta{flex:1;min-width:0}
+.rmeta .nm{font-weight:600}
+.rmeta .to{font-size:12.5px;color:var(--ink-soft)}
+.body{max-width:66ch;white-space:pre-wrap}
+.body p{margin:0 0 15px}
+.sig{color:var(--ink-soft);font-size:13.5px;border-left:3px solid var(--rule);padding-left:12px;margin-top:26px}
+.acts{display:flex;gap:9px;margin-top:30px;flex-wrap:wrap}
+.acts button{
+  border:1px solid var(--rule);padding:8px 19px;border-radius:20px;font-weight:500;
+}
+.acts button:hover{background:var(--hover)}
+.back{display:none;padding:12px 14px;border-bottom:1px solid var(--rule);color:var(--ink-soft)}
+
+/* ---------- compose window ---------- */
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none}
+.scrim.on{display:block}
+.cwin{
+  position:fixed;right:22px;bottom:0;width:min(520px,calc(100vw - 24px));
+  background:var(--panel);border:1px solid var(--rule);border-radius:10px 10px 0 0;
+  box-shadow:0 -2px 24px rgba(0,0,0,.3);display:none;flex-direction:column;z-index:5;
+}
+.cwin.on{display:flex}
+.cbar{
+  display:flex;align-items:center;justify-content:space-between;background:var(--ink);
+  color:var(--concrete);padding:10px 14px;border-radius:9px 9px 0 0;font-weight:600;font-size:14px;
+}
+.cbar button{color:var(--concrete);font-size:17px;line-height:1;padding:0 4px}
+.cwin label{display:block;border-bottom:1px solid var(--rule)}
+.cwin input,.cwin textarea{
+  width:100%;border:0;background:none;color:var(--ink);font:inherit;padding:11px 14px;outline:none;
+}
+.cwin textarea{height:190px;resize:none;border:0}
+.cfoot{display:flex;align-items:center;gap:12px;padding:12px 14px}
+.send{
+  background:var(--crimson);color:#fff;font-weight:600;padding:9px 26px;border-radius:20px;
+}
+.send:hover{filter:brightness(1.08)}
+.cfoot .hint{font-size:12px;color:var(--ink-soft)}
+.toast{
+  position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(140%);
+  background:var(--ink);color:var(--concrete);padding:12px 22px;border-radius:6px;
+  font-size:14px;z-index:9;transition:transform .22s ease;
+}
+.toast.on{transform:translateX(-50%) translateY(0)}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+
+/* ---------- responsive ---------- */
+@media (max-width:900px){
+  .sidebar{
+    position:fixed;left:0;top:51px;bottom:0;z-index:4;background:var(--concrete);
+    border-right:1px solid var(--rule);transform:translateX(-102%);transition:transform .2s ease;
+  }
+  .sidebar.on{transform:none}
+  .hamburger{display:block}
+  .main{padding:0}
+  .pane{border-radius:0;border-width:1px 0 0}
+  .from{flex-basis:120px}
+  .tab{padding:12px 15px}
+}
+@media (max-width:620px){
+  .wordmark{font-size:23px}
+  .snip{display:none}
+  .from{flex-basis:auto;width:100%}
+  .row{flex-wrap:wrap;row-gap:2px;align-items:flex-start}
+  .mid{flex-basis:100%;padding-left:27px}
+  .reader{padding:16px 16px 50px}
+  .back{display:block}
+  .tabs .tab span.lbl{display:none}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <button class="hamburger" id="burger" aria-label="Open folders">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+  </button>
+  <div class="brand">
+    <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true">
+      <rect x="2" y="7" width="28" height="19" rx="2.5" fill="var(--crimson)"/>
+      <path d="M2.5 9.5 16 19 29.5 9.5" fill="none" stroke="var(--panel)" stroke-width="2.2"/>
+      <rect x="2" y="23" width="28" height="3" fill="var(--hazard)"/>
+      <rect x="2" y="7" width="28" height="19" rx="2.5" fill="none" stroke="var(--ink)" stroke-width="1.4" opacity=".35"/>
+    </svg>
+    <div class="wordmark">goon<span>mail</span></div>
+  </div>
+  <div class="search">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--ink-soft)" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+    <input id="q" type="search" placeholder="Search mail, alibis, license plates" aria-label="Search mail">
+  </div>
+  <div class="me">
+    <button class="theme-toggle" id="themeBtn" aria-label="Switch theme">Lights</button>
+    <div class="avatar" title="Nunzio &quot;The Wrench&quot; Delvecchio">ND</div>
+  </div>
+</header>
+
+<div class="shell">
+  <nav class="sidebar" id="sidebar" aria-label="Folders">
+    <button class="compose" id="composeBtn">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h4L20 8l-4-4L4 16v4z"/></svg>
+      Compose
+    </button>
+    <div id="folders"></div>
+    <div class="navhead">Labels</div>
+    <div id="labels"></div>
+    <div class="storage">
+      <div class="bar"><i></i></div>
+      3.1 crowbars of 15 used. <br>Older attachments auto-shred after 30 days.
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="pane">
+      <div class="tabs" id="tabs"></div>
+      <button class="back" id="backBtn">← Back to the list</button>
+      <div class="list" id="list"></div>
+      <div class="reader" id="reader" hidden></div>
+    </div>
+  </main>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<section class="cwin" id="cwin" aria-label="New message">
+  <div class="cbar">New threat<button id="closeC" aria-label="Discard">✕</button></div>
+  <label><input id="cTo" placeholder="To (first names only)" aria-label="To"></label>
+  <label><input id="cSub" placeholder="Subject (keep it vague)" aria-label="Subject"></label>
+  <textarea id="cBody" placeholder="Say nothing that a jury could read out loud." aria-label="Message"></textarea>
+  <div class="cfoot">
+    <button class="send" id="sendBtn">Send</button>
+    <span class="hint">Encrypted, allegedly.</span>
+  </div>
+</section>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const MAIL = [
+  { f:'inbox', tab:'primary', from:'The Boss (do not reply)', ini:'TB', to:'me, Vinny, 4 others',
+    sub:'RE: RE: RE: the thing with the guy', tag:'Boss',
+    snip:"Do not put the thing in writing. I've told you about putting the thing in writing.",
+    when:'9:41 AM', unread:true, star:true,
+    body:`Nunzio.
+
+Do not put the thing in writing. I have told you about putting the thing in writing. Twice now. In writing, which I regret.
+
+The guy knows a guy. That guy is the problem. Handle it the way we handled the last one, minus the parts that ended up on the news.
+
+Tuesday. The usual place. Bring the van that still has doors.`,
+    sig:`— Sent from my burner` },
+
+  { f:'inbox', tab:'primary', from:'Henchperson Resources', ini:'HR', to:'all-muscle@goonmail.com',
+    sub:'Mandatory: Standing Menacingly refresher, Tue 4pm', tag:'Lair',
+    snip:'Several of you have been loitering. Loitering is not menacing. There is a difference and we will cover it.',
+    when:'8:15 AM', unread:true, star:false,
+    body:`Team,
+
+Attendance at Tuesday's session is mandatory for all crew, including contractors and the two of you who insist you are "consultants."
+
+Several of you have been loitering. Loitering is not menacing. There is a difference and we will cover it in module one.
+
+Agenda:
+• Arms crossed vs. hands clasped — when to use each
+• Sunglasses indoors: a cost-benefit analysis
+• Doorway blocking without violating fire code
+• Cracking knuckles: repetitive strain injury and you
+
+Lunch is provided. Please do not bring weapons into the conference room again. The table is rented.`,
+    sig:`Deb, People & Intimidation Operations` },
+
+  { f:'inbox', tab:'primary', from:'Vinny Two Phones', ini:'VT', to:'me',
+    sub:'who took my crowbar', tag:'',
+    snip:'it had my name on it. in tape. it said VINNY. i am not accusing anyone but i am looking at Carl.',
+    when:'Yesterday', unread:true, star:false,
+    body:`it had my name on it. in tape. it said VINNY
+
+i am not accusing anyone but i am looking at Carl
+
+if it is back on the rack by friday we forget the whole thing. no questions. clean slate
+
+if it is not back on the rack by friday i am going to ask questions and i am bad at asking questions, you know this about me
+
+also does anyone have a charger, both phones are at 4%`,
+    sig:'' },
+
+  { f:'inbox', tab:'primary', from:'Lair Facilities', ini:'LF', to:'all staff',
+    sub:'Shark tank down for maintenance through Thursday', tag:'Lair',
+    snip:'Please use the alternate trapdoor by the vending machines. The sharks are fine. The sharks are always fine.',
+    when:'Yesterday', unread:false, star:false,
+    body:`Notice to all personnel,
+
+The main tank is offline for filtration work through Thursday. Please use the alternate trapdoor by the vending machines for the duration.
+
+The sharks are fine. The sharks are always fine. Stop emailing about the sharks.
+
+Also unresolved: someone keeps setting the self-destruct countdown to 10 seconds "for the drama." The vendor default is 10 minutes for a reason. We are a workplace.`,
+    sig:'Facilities & Deathtraps, ext. 4' },
+
+  { f:'inbox', tab:'primary', from:'Payroll', ini:'PR', to:'me',
+    sub:'Your hazard pay was processed', tag:'Payroll',
+    snip:'Deposited to the account you told us not to write down. Reimbursements for the warehouse require receipts.',
+    when:'Mon', unread:false, star:true,
+    body:`Nunzio,
+
+Hazard pay for the period has been processed and deposited to the account you told us not to write down, which made this difficult for everyone.
+
+A reminder that reimbursement claims require receipts. "Trust me" is not a receipt. A photo of a receipt in a puddle is, at best, half a receipt.
+
+Rejected this cycle:
+• One (1) unmarked van, marked
+• Ski masks, 14 — approved
+• Ski masks, 14 more — denied, you have fourteen
+• "Miscellaneous rope" — please be specific`,
+    sig:'Accounts Payable & Deniable' },
+
+  { f:'inbox', tab:'threats', from:'Unmarked Van Rentals', ini:'UV', to:'me',
+    sub:'Your van is due back (it is very due back)', tag:'',
+    snip:'The van was due Tuesday. It is Friday. We have your deposit and a growing sense of unease.',
+    when:'Mon', unread:false, star:false,
+    body:`Dear valued customer,
+
+The van was due Tuesday. It is Friday. We have your deposit and a growing sense of unease.
+
+Per your rental agreement, the following are not covered:
+• Fire
+• Water
+• Fire, then water
+• Whatever happened to the rear doors
+
+Return the vehicle by close of business and we will consider the matter closed. We are very good at considering matters closed.`,
+    sig:'Fleet Recovery' },
+
+  { f:'inbox', tab:'threats', from:'Knuckles & Co. Supply', ini:'KC', to:'me',
+    sub:'Autumn catalogue: 20% off all blunt objects', tag:'',
+    snip:'Crowbars, tire irons, and one (1) suspiciously long sock. Free engraving — though we advise against it.',
+    when:'Sep 12', unread:false, star:false,
+    body:`Our autumn range has landed.
+
+Crowbars, tire irons, pipe wrenches, and one (1) suspiciously long sock. All at twenty percent off through the end of the month.
+
+New this season: a matte finish that does not catch security lighting. Our most requested feature, by a wide margin, by people who declined to explain why.
+
+Free engraving on orders over $200 — though our legal team asks us to note that engraving your name on a tool is, historically, a choice.`,
+    sig:'Blunt Instruments, since 1974' },
+
+  { f:'inbox', tab:'social', from:'Carl', ini:'CA', to:'me',
+    sub:'I did not take the crowbar', tag:'',
+    snip:'I want that on the record. Whatever the record is here. Is this the record?',
+    when:'Sep 12', unread:false, star:false,
+    body:`I did not take the crowbar.
+
+I want that on the record. Whatever the record is here. Is this the record?
+
+I have my own crowbar. I have had my own crowbar since the Tuesday thing. It has a grip. Vinny's does not have a grip. Why would I downgrade.
+
+Please tell him. He does not open my messages. He has two phones and he answers neither.`,
+    sig:'' },
+
+  { f:'inbox', tab:'social', from:'LinkedOut', ini:'LO', to:'me',
+    sub:'5 people viewed your profile this week', tag:'',
+    snip:'Four of them work in law enforcement. One of them viewed it eleven times. Upgrade to see who.',
+    when:'Sep 11', unread:false, star:false,
+    body:`Your profile is getting attention.
+
+5 people viewed your profile this week. Four of them list their employer as a law enforcement agency. One of them viewed it eleven times in a single evening.
+
+Upgrade to Premium to see exactly who is looking at you, which in your case may be less of a feature and more of a warning.
+
+Also, congratulate Vinny on his work anniversary. 6 years!`,
+    sig:'' },
+
+  { f:'snitches', tab:'primary', from:'Witness Protection Program', ini:'WP', to:'me',
+    sub:'A fresh start is waiting — new name, new city, new you', tag:'',
+    snip:'You have been pre-approved for relocation. Zero paperwork. Ask about our dental.',
+    when:'Sep 10', unread:false, star:false,
+    body:`Tired of the life? You have been pre-approved for relocation.
+
+New name. New city. A modest bungalow somewhere flat and forgettable. Our clients report a 94% reduction in looking over their shoulder within the first year.
+
+Includes: dental, a job at a hardware store, and a plausible backstory involving a boat.
+
+Reply to this message and someone will be parked outside your house within the hour, which we understand reads badly, but is meant warmly.`,
+    sig:'' },
+
+  { f:'snitches', tab:'primary', from:'Interpol Recruitment', ini:'IR', to:'me',
+    sub:'Your skills are a strong match for our team', tag:'',
+    snip:'We noticed your experience in logistics, night work, and rapid asset relocation. Let us talk.',
+    when:'Sep 8', unread:false, star:false,
+    body:`We noticed your background in logistics, night work, and rapid asset relocation.
+
+Candidates with your profile often thrive on the other side. The hours are similar. The vans are nicer. The pension is real.
+
+No obligation. Just a conversation, in a room, with a table, and a door that locks from outside for fire safety reasons.
+
+Bring anyone you like. Bring everyone you like. Bring a list.`,
+    sig:'' },
+
+  { f:'drafts', tab:'primary', from:'Draft', ini:'ND', to:'The Boss',
+    sub:'(no subject)', tag:'',
+    snip:'Boss, about Tuesday — I think we should reconsider the part where I go in first. Saved 14 days ago.',
+    when:'Sep 4', unread:false, star:false,
+    body:`Boss, about Tuesday —
+
+I think we should reconsider the part where I go in first. Not because of nerves. Because of logistics. Mainly logistics.
+
+Consider: Vinny is taller. Vinny has the reach. Vinny has two phones, so if one gets
+
+[draft ends here, saved 14 days ago, never sent]`,
+    sig:'' },
+
+  { f:'sent', tab:'primary', from:'me', ini:'ND', to:'Vinny Two Phones',
+    sub:'RE: who took my crowbar', tag:'',
+    snip:'it was Carl. sorry Carl. it was definitely Carl. probably Carl. it was one of us and it was not me.',
+    when:'Yesterday', unread:false, star:false,
+    body:`it was Carl
+
+sorry Carl
+
+it was definitely Carl. probably Carl. it was one of us and it was not me, and there are only three of us, and I am telling you it was not me
+
+check the van. everything ends up in the van`,
+    sig:'' },
+
+  { f:'disposed', tab:'primary', from:'The Boss (do not reply)', ini:'TB', to:'me',
+    sub:'the thing with the guy (original)', tag:'',
+    snip:'Deleted 2 days ago. Item will be permanently unrecoverable in 28 days.',
+    when:'Sep 6', unread:false, star:false,
+    body:`[This message was deleted from Disposed and is being overwritten on a rolling schedule.]
+
+What remains is a subject line, a timestamp, and a very good feeling about all of this.
+
+Items in Disposed are permanently unrecoverable after 30 days. Nothing here has ever been recovered. Nothing here ever will be. We want to be extremely clear about that in a way that we hope reads as reassuring.`,
+    sig:'' },
+];
+
+const FOLDERS = [
+  { id:'inbox',    name:'Inbox',     ico:'▤' },
+  { id:'starred',  name:'Starred',   ico:'★' },
+  { id:'layinglow',name:'Laying low', ico:'◔' },
+  { id:'sent',     name:'Sent',      ico:'➤' },
+  { id:'drafts',   name:'Unsent threats', ico:'✎' },
+  { id:'snitches', name:'Snitches',  ico:'⚠' },
+  { id:'disposed', name:'Disposed',  ico:'⌫' },
+];
+const LABELS = [
+  { name:'Boss',    color:'#a71d28' },
+  { name:'Lair',    color:'#3d7a52' },
+  { name:'Payroll', color:'#e8b71d' },
+  { name:'Alibis',  color:'#4a6fa5' },
+];
+const TABS = [
+  { id:'primary', name:'Primary',   ico:'▤' },
+  { id:'threats', name:'Shakedowns',ico:'$' },
+  { id:'social',  name:'The crew',  ico:'☺' },
+];
+
+MAIL.forEach((m,i)=>m.id=i);
+let state = { folder:'inbox', tab:'primary', q:'', open:null };
+
+const $ = s => document.querySelector(s);
+const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function inFolder(m, f){
+  if(f==='starred') return m.star;
+  if(f==='layinglow') return false;
+  return m.f === f;
+}
+function visible(){
+  let out = MAIL.filter(m => inFolder(m, state.folder));
+  if(state.folder==='inbox') out = out.filter(m => m.tab === state.tab);
+  if(state.q){
+    const q = state.q.toLowerCase();
+    out = MAIL.filter(m =>
+      (m.sub+m.from+m.snip+m.body).toLowerCase().includes(q));
+  }
+  return out;
+}
+function unreadCount(f){
+  return MAIL.filter(m => inFolder(m,f) && m.unread).length;
+}
+
+function renderNav(){
+  $('#folders').innerHTML = FOLDERS.map(f=>{
+    const n = unreadCount(f.id);
+    return `<button class="navitem ${state.folder===f.id&&!state.q?'on':''}" data-folder="${f.id}">
+      <span class="ico">${f.ico}</span>${f.name}
+      ${n?`<span class="ct">${n}</span>`:''}</button>`;
+  }).join('');
+  $('#labels').innerHTML = LABELS.map(l=>
+    `<button class="navitem" data-label="${l.name}">
+      <span class="dot" style="background:${l.color}"></span>${l.name}</button>`).join('');
+  $('#tabs').innerHTML = (state.folder==='inbox'&&!state.q) ? TABS.map(t=>
+    `<button class="tab ${state.tab===t.id?'on':''}" data-tab="${t.id}">
+      <span class="ico">${t.ico}</span><span class="lbl">${t.name}</span></button>`).join('') : '';
+}
+
+function renderList(){
+  const items = visible();
+  const el = $('#list');
+  if(!items.length){
+    const msg = state.q
+      ? {a:'Nothing on file.', b:'Which is the ideal outcome, really.'}
+      : state.folder==='layinglow'
+        ? {a:'Everything is laying low.', b:'Nothing surfaces until the heat dies down. Check back in a few weeks.'}
+        : {a:'Empty.', b:'No messages here. Keep it that way.'};
+    el.innerHTML = `<div class="empty"><b>${msg.a}</b>${msg.b}</div>`;
+    return;
+  }
+  el.innerHTML = items.map(m=>`
+    <div class="row ${m.unread?'unread':''}" data-id="${m.id}" role="button" tabindex="0">
+      <span class="star ${m.star?'on':''}" data-star="${m.id}" role="button" tabindex="0"
+        aria-label="Star">${m.star?'★':'☆'}</span>
+      <span class="from">${esc(m.from)}</span>
+      <span class="mid">${m.tag?`<span class="tag">${m.tag}</span>`:''}${esc(m.sub)}
+        <span class="snip"> — ${esc(m.snip)}</span></span>
+      <span class="when">${m.when}</span>
+    </div>`).join('');
+}
+
+function renderReader(){
+  const m = MAIL[state.open];
+  $('#reader').innerHTML = `
+    <h1>${esc(m.sub)}</h1>
+    <div class="rhead">
+      <div class="avatar">${m.ini}</div>
+      <div class="rmeta">
+        <div class="nm">${esc(m.from)}</div>
+        <div class="to">to ${esc(m.to)} · ${m.when}</div>
+      </div>
+    </div>
+    <div class="body">${m.body.split('\n\n').map(p=>`<p>${esc(p)}</p>`).join('')}</div>
+    ${m.sig?`<div class="sig">${esc(m.sig)}</div>`:''}
+    <div class="acts">
+      <button data-act="Reply">Reply</button>
+      <button data-act="Forward">Forward</button>
+      <button data-act="Deny">Deny everything</button>
+      <button data-act="Shred">Shred</button>
+    </div>`;
+}
+
+function render(){
+  renderNav();
+  const reading = state.open !== null;
+  $('#list').hidden = reading;
+  $('#reader').hidden = !reading;
+  $('#backBtn').style.display = reading ? '' : 'none';
+  if(reading) renderReader(); else renderList();
+}
+
+let toastTimer;
+function toast(msg){
+  const t = $('#toast');
+  t.textContent = msg; t.classList.add('on');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('on'), 2600);
+}
+
+document.addEventListener('click', e=>{
+  const nav = e.target.closest('[data-folder]');
+  if(nav){ state.folder = nav.dataset.folder; state.open=null; state.q=''; $('#q').value='';
+           $('#sidebar').classList.remove('on'); render(); return; }
+  const lab = e.target.closest('[data-label]');
+  if(lab){ state.q = lab.dataset.label; $('#q').value = lab.dataset.label; state.open=null; 
+           $('#sidebar').classList.remove('on'); render(); return; }
+  const tab = e.target.closest('[data-tab]');
+  if(tab){ state.tab = tab.dataset.tab; state.open=null; render(); return; }
+  const st = e.target.closest('[data-star]');
+  if(st){ e.stopPropagation(); const m = MAIL[st.dataset.star]; m.star=!m.star; render(); return; }
+  const row = e.target.closest('[data-id]');
+  if(row){ const m = MAIL[row.dataset.id]; m.unread=false; state.open=m.id;
+           render(); $('#reader').scrollTop=0; return; }
+  const act = e.target.closest('[data-act]');
+  if(act){
+    const lines = { Reply:'Reply saved to Unsent threats.',
+      Forward:'Forwarded. That is now two people who know.',
+      Deny:'Denial logged. Timestamped, unhelpfully.',
+      Shred:'Shredded. Recoverable for 30 days, as always.' };
+    toast(lines[act.dataset.act]); return;
+  }
+});
+document.addEventListener('keydown', e=>{
+  if(e.key==='Enter'||e.key===' '){
+    const r = e.target.closest('[data-id],[data-star]');
+    if(r){ e.preventDefault(); r.click(); }
+  }
+  if(e.key==='Escape'){ closeCompose(); if(state.open!==null){ state.open=null; render(); } }
+});
+
+$('#backBtn').onclick = ()=>{ state.open=null; render(); };
+$('#burger').onclick = ()=> $('#sidebar').classList.toggle('on');
+$('#q').addEventListener('input', e=>{ state.q = e.target.value.trim(); state.open=null; render(); });
+
+$('#themeBtn').onclick = ()=>{
+  const cur = document.documentElement.getAttribute('data-theme');
+  const dark = cur ? cur==='dark'
+    : matchMedia('(prefers-color-scheme: dark)').matches;
+  document.documentElement.setAttribute('data-theme', dark ? 'light' : 'dark');
+  $('#themeBtn').textContent = dark ? 'Lights' : 'Shadows';
+};
+
+function openCompose(){ $('#cwin').classList.add('on'); $('#scrim').classList.add('on'); $('#cTo').focus(); }
+function closeCompose(){ $('#cwin').classList.remove('on'); $('#scrim').classList.remove('on'); }
+$('#composeBtn').onclick = openCompose;
+$('#closeC').onclick = ()=>{ closeCompose(); toast('Saved to Unsent threats.'); };
+$('#scrim').onclick = closeCompose;
+$('#sendBtn').onclick = ()=>{
+  const to = $('#cTo').value.trim();
+  if(!to){ toast('Needs a recipient. First name is enough. First name is safer.'); $('#cTo').focus(); return; }
+  MAIL.push({ f:'sent', tab:'primary', id:MAIL.length, from:'me', ini:'ND', to, tag:'',
+    sub:$('#cSub').value.trim()||'(no subject)',
+    snip:($('#cBody').value.trim()||'No message body. Bold.').slice(0,90),
+    when:'Just now', unread:false, star:false,
+    body:$('#cBody').value.trim()||'[no message body]', sig:'— Sent from my burner' });
+  $('#cTo').value=$('#cSub').value=$('#cBody').value='';
+  closeCompose(); toast('Sent. Deny everything.');
+};
+
+render();
+</script>
+</body>
+</html>
